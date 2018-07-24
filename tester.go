@@ -1,39 +1,39 @@
 package fasthttp_test
 
 import (
-	"testing"
-	"github.com/valyala/fasthttp"
-	"net"
 	"fmt"
+	"net"
+	"testing"
+
 	"github.com/buaazp/fasthttprouter"
 	"github.com/parnurzeal/gorequest"
+	"github.com/valyala/fasthttp"
 )
 
-const(
-	GET		=		"GET"
-	POST		=		"POST"
-	PUT		=		"PUT"
-	DELETE		=		"DELETE"
+const (
+	GET    = "GET"
+	POST   = "POST"
+	PUT    = "PUT"
+	DELETE = "DELETE"
 )
 
-func StartServerOnPort(t *testing.T, method, path string, port int, handler func(ctx *fasthttp.RequestCtx), requestBody interface{}) (gorequest.Response, string, []error) {
+func StartServerOnPort(t *testing.T, method, path string, port int, handler func(ctx *fasthttp.RequestCtx, router *fasthttprouter.Router), requestBody interface{}) (gorequest.Response, string, []error) {
 	ln, err := net.Listen("tcp", fmt.Sprintf("localhost:%d", port))
 	defer ln.Close()
 
 	if err != nil {
 		t.Fatalf("cannot start tcp server on port %d: %s", port, err)
 	}
-	router := fasthttprouter.New()
+
 	router.Handle(method, path, handler)
 	go fasthttp.Serve(ln, router.Handler)
 
-
 	agent := gorequest.New()
 	fullPath := fmt.Sprintf("http://localhost:%d%s", port, path)
-	var(
-		resp	gorequest.Response
-		body	string
-		errs	[]error
+	var (
+		resp gorequest.Response
+		body string
+		errs []error
 	)
 
 	switch method {
